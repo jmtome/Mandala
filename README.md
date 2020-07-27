@@ -1,9 +1,17 @@
 # Mandala
-Show how you feel. Mandala.
+### Show how you feel. Mandala.
+## All Programatically
 
-1. TableView + UIVisualEffect+Blur
-2. Embedded VCs
-3. Use of forward delegation through a the use of a protocol
-4. UIStackViews
+### ToDo's
+- [x] TableView + UIVisualEffect+Blur
+- [ ] Persist data with codable
+- [x] Simple interface for both day/night modes
+- [x] Embedded VCs
+- [x] Use of forward delegation through a the use of a protocol
+- [ ] Improve UI
+- [x] UIStackViews
+- [x] Delete Moods
+- [ ] Clean up spaghetti code
 
-All Programatically
+
+<img src="mandalaMoods.gif" width="400"/>
