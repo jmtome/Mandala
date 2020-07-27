@@ -13,29 +13,37 @@ class MoodSelectionViewController: UIViewController {
     var moods: [Mood] = [Mood]() {
         didSet {
             currentMood = moods.first
-            moodButtons = moods.map { mood in
-                let moodButton = UIButton()
-                moodButton.setImage(mood.image, for: .normal)
-                moodButton.imageView?.contentMode = .scaleAspectFit
-                moodButton.adjustsImageWhenHighlighted = false
-                moodButton.addTarget(self, action: #selector(moodSelectionChanged(_:)), for: .touchUpInside)
-                return moodButton
-                
+            
+//            moodButtons = moods.map { mood in
+//                let moodButton = UIButton()
+//                moodButton.setImage(mood.image, for: .normal)
+//                moodButton.imageView?.contentMode = .scaleAspectFit
+//                moodButton.adjustsImageWhenHighlighted = false
+//                moodButton.addTarget(self, action: #selector(moodSelectionChanged(_:)), for: .touchUpInside)
+//                return moodButton
+//
+//            }
+            
+            moodSelector.images = moods.map { (mood) in
+                return mood.image
             }
+            moodSelector.highlightColors = moods.map({ (mood) in
+                mood.color
+            })
             
         }
     }
-    var moodButtons: [UIButton] = [UIButton]() {
-        didSet {
-            oldValue.forEach { (button) in
-                button.removeFromSuperview()
-            }
-            moodButtons.forEach { (button) in
-                stackView.addArrangedSubview(button)
-            }
-            
-        }
-    }
+//    var moodButtons: [UIButton] = [UIButton]() {
+//        didSet {
+//            oldValue.forEach { (button) in
+//                button.removeFromSuperview()
+//            }
+//            moodButtons.forEach { (button) in
+//                stackView.addArrangedSubview(button)
+//            }
+//
+//        }
+//    }
     
     var currentMood: Mood? {
         didSet {
@@ -45,16 +53,18 @@ class MoodSelectionViewController: UIViewController {
                 return
             }
             addMoodButton?.setTitle("I'm \(currentMood.name)", for: .normal)
-            addMoodButton?.backgroundColor = currentMood.color
-            
+//            addMoodButton?.backgroundColor = currentMood.color
+            let selectionAnimator = UIViewPropertyAnimator(duration: 0.3, dampingRatio: 0.7) {
+                self.addMoodButton?.backgroundColor = currentMood.color
+            }
+            selectionAnimator.startAnimation()
         }
     }
     
-    @objc private func moodSelectionChanged(_ sender: UIButton) {
-        guard let selectedIndex = moodButtons.firstIndex(of: sender) else {
-            preconditionFailure("Unable to find the tapped button in the buttons library array")
-            
-        }
+    @objc private func moodSelectionChanged(_ sender: ImageSelector) {
+        
+        let selectedIndex = sender.selectedIndex
+        
         currentMood = moods[selectedIndex]
         
     }
@@ -66,16 +76,7 @@ class MoodSelectionViewController: UIViewController {
         vb.translatesAutoresizingMaskIntoConstraints = false
         return vb
     }()
-    let stackView: UIStackView = {
-        let sv = UIStackView(frame: .zero)
-        sv.translatesAutoresizingMaskIntoConstraints = false
-        sv.axis = .horizontal
-        sv.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        sv.distribution = .fillEqually
-        sv.spacing = 12
-        
-        return sv
-    }()
+    
     let addMoodButton: UIButton! = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -90,6 +91,15 @@ class MoodSelectionViewController: UIViewController {
         button.layer.shadowRadius = 3
         button.layer.masksToBounds = false
         return button
+    }()
+    
+    
+    var moodSelector: ImageSelector! = {
+        let selector = ImageSelector(frame: .zero)
+        selector.translatesAutoresizingMaskIntoConstraints = false
+        selector.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        
+        return selector
     }()
     
     
@@ -135,13 +145,15 @@ class MoodSelectionViewController: UIViewController {
         //visualBlur.heightAnchor.constraint(equalToConstant: 100).isActive = true
         //visualblur's height will depend upon its content
         
-        visualBlur.contentView.addSubview(stackView)
+        visualBlur.contentView.addSubview(moodSelector)
         //visualBlur.addSubview(stackView)
         //you dont add subviews to visualblur but to its contentview
-        stackView.leadingAnchor.constraint(equalTo: visualBlur.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
-        stackView.trailingAnchor.constraint(equalTo: visualBlur.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
-        stackView.bottomAnchor.constraint(equalTo: visualBlur.contentView.layoutMarginsGuide.bottomAnchor, constant: 0).isActive = true
-        stackView.topAnchor.constraint(equalTo: visualBlur.contentView.topAnchor, constant: 8).isActive = true
+        moodSelector.leadingAnchor.constraint(equalTo: visualBlur.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
+        moodSelector.trailingAnchor.constraint(equalTo: visualBlur.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
+        moodSelector.bottomAnchor.constraint(equalTo: visualBlur.contentView.layoutMarginsGuide.bottomAnchor, constant: 0).isActive = true
+        moodSelector.topAnchor.constraint(equalTo: visualBlur.contentView.topAnchor, constant: 8).isActive = true
+        moodSelector.addTarget(self, action: #selector(moodSelectionChanged(_:)), for: .valueChanged)
+        
         self.view.addSubview(addMoodButton)
         addMoodButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         addMoodButton.bottomAnchor.constraint(equalTo: visualBlur.topAnchor, constant: -20).isActive = true
